@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"crypto/tls"
 )
 
 var (
@@ -33,8 +34,12 @@ type (
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	query := r.FormValue("text")
-	client := &http.Client{}
-	path := fmt.Sprintf("%s/wiki/rest/prototype/1/search?query=%s&type=search&os_authType=basic", wikiURL, query)
+	tr := &http.Transport{
+        	TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+    	}
+	client := &http.Client{Transport: tr}
+	path := fmt.Sprintf("%s/rest/prototype/1/search?query=%s&type=search&os_authType=basic", wikiURL, query)
+	
 	req, err := http.NewRequest("GET", path, nil)
 	if err != nil {
 		log.Println(err)
@@ -45,10 +50,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	req.Header.Set("Accept", "application/json")
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println(err)
+		log.Println(resp)
 		fmt.Fprintf(w, fmt.Sprintf("%s", err))
 		return
 	}
+
 	defer resp.Body.Close()
 	d := json.NewDecoder(resp.Body)
 	var result SearchResult
