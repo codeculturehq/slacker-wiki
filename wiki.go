@@ -50,7 +50,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	req.Header.Set("Accept", "application/json")
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println(resp)
+		log.Println(err)
 		fmt.Fprintf(w, fmt.Sprintf("%s", err))
 		return
 	}
